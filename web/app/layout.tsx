@@ -17,18 +17,22 @@ const rubik = Rubik({
   display: "swap",
 });
 
+// Next.js metadata does NOT auto-prepend basePath to manifest/icon URLs, so we
+// stitch it in ourselves. NEXT_PUBLIC_BASE_PATH is injected by next.config.js.
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export const metadata: Metadata = {
   title: "מדבקות של תמר",
   description: "תגידי מה את רוצה — ונדפיס לך מדבקה",
-  manifest: "/manifest.json",
+  manifest: `${BASE}/manifest.json`,
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "מדבקות",
   },
   icons: {
-    icon: "/icon-192.png",
-    apple: "/icon-192.png",
+    icon: `${BASE}/icon-192.png`,
+    apple: `${BASE}/apple-touch-icon.png`,
   },
 };
 
