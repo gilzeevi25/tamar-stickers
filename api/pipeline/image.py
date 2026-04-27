@@ -11,7 +11,7 @@ import replicate
 from PIL import Image
 
 PRINTER_WIDTH_PX = 384  # cat printer hardware width
-FLUX_MODEL = "black-forest-labs/flux-schnell"
+FLUX_MODEL = "ideogram-ai/ideogram-v3-turbo""
 
 
 def _get_replicate_client() -> replicate.Client:
@@ -30,13 +30,10 @@ async def generate_lineart_png(english_prompt: str) -> bytes:
             FLUX_MODEL,
             input={
                 "prompt": english_prompt,
-                "num_inference_steps": 4,
                 "aspect_ratio": "1:1",
-                "output_format": "png",
-                "output_quality": 100,
-                "num_outputs": 1,
-                "go_fast": True,
-                "disable_safety_checker": False,
+                "style_type": "Design",          # cleanest line-art-ish style
+                "magic_prompt_option": "Off",    # Claude already crafted the prompt
+                "resolution": "1024x1024",
             },
         )
 
