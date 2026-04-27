@@ -1,5 +1,7 @@
 "use client";
 
+import { getIdToken, useAuthStore } from "@/lib/auth";
+
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export interface TranscribeResponse {
@@ -26,7 +28,25 @@ export class ApiError extends Error {
   }
 }
 
+export class AuthError extends Error {
+  constructor(message = "auth_error") {
+    super(message);
+    this.name = "AuthError";
+  }
+}
+
+function authHeader(): Record<string, string> {
+  const token = getIdToken();
+  if (!token) throw new AuthError("not_signed_in");
+  return { authorization: `Bearer ${token}` };
+}
+
 async function parseError(res: Response): Promise<never> {
+  if (res.status === 401) {
+    useAuthStore.getState().signOut();
+    throw new AuthError();
+  }
+
   let body: unknown = null;
   try {
     body = await res.json();
@@ -46,6 +66,7 @@ async function parseError(res: Response): Promise<never> {
 
 export async function warmup(): Promise<void> {
   // Best-effort. Render free tier takes ~50s to wake; we kick it on app load.
+  // Public route — no auth header.
   try {
     await fetch(`${BASE}/api/warmup`, { method: "GET" });
   } catch {
@@ -58,6 +79,7 @@ export async function transcribe(audio: Blob): Promise<TranscribeResponse> {
   form.append("audio", audio, "audio.webm");
   const res = await fetch(`${BASE}/api/transcribe`, {
     method: "POST",
+    headers: authHeader(),
     body: form,
   });
   if (!res.ok) await parseError(res);
@@ -67,7 +89,7 @@ export async function transcribe(audio: Blob): Promise<TranscribeResponse> {
 export async function generate(hebrew: string): Promise<GenerateResponse> {
   const res = await fetch(`${BASE}/api/generate`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...authHeader() },
     body: JSON.stringify({ hebrew }),
   });
   if (!res.ok) await parseError(res);
@@ -81,7 +103,7 @@ export async function refine(
 ): Promise<GenerateResponse> {
   const res = await fetch(`${BASE}/api/refine`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...authHeader() },
     body: JSON.stringify({ hebrew, prev_english, attempt }),
   });
   if (!res.ok) await parseError(res);

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Heebo, Rubik } from "next/font/google";
+import Script from "next/script";
 
 import "./globals.css";
 
@@ -53,6 +54,10 @@ export default function RootLayout({
   return (
     <html lang="he" dir="rtl" className={`${heebo.variable} ${rubik.variable}`}>
       <body className="font-heebo bg-cream text-ink antialiased no-select">
+        <Script
+          src="https://accounts.google.com/gsi/client"
+          strategy="afterInteractive"
+        />
         {children}
       </body>
     </html>
