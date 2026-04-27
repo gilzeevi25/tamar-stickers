@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { SignInGate } from "@/components/SignInGate";
 import {
   connectPrinter,
   getLastDeviceName,
@@ -9,6 +10,14 @@ import {
 } from "@/lib/printer";
 
 export default function ParentPage() {
+  return (
+    <SignInGate>
+      <ParentSettings />
+    </SignInGate>
+  );
+}
+
+function ParentSettings() {
   const [supported, setSupported] = useState(true);
   const [lastName, setLastName] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("");

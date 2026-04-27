@@ -7,10 +7,11 @@ import os
 from typing import Annotated
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from auth import verify_user
 from pipeline.image import generate_lineart_png, prepare_for_thermal
 from pipeline.prompt import hebrew_to_english_prompt, refine_prompt
 from pipeline.stt import transcribe_hebrew
@@ -78,7 +79,10 @@ async def warmup() -> dict[str, str]:
 
 
 @app.post("/api/transcribe", response_model=TranscribeResponse)
-async def transcribe(audio: Annotated[UploadFile, File()]) -> TranscribeResponse:
+async def transcribe(
+    audio: Annotated[UploadFile, File()],
+    _email: Annotated[str, Depends(verify_user)],
+) -> TranscribeResponse:
     data = await audio.read()
     size = len(data)
     if size < MIN_AUDIO_BYTES:
@@ -117,7 +121,10 @@ async def _generate(english_prompt: str) -> GenerateResponse:
     response_model=GenerateResponse,
     responses={422: {"model": RefusalResponse}},
 )
-async def generate(req: GenerateRequest) -> GenerateResponse:
+async def generate(
+    req: GenerateRequest,
+    _email: Annotated[str, Depends(verify_user)],
+) -> GenerateResponse:
     try:
         result = await hebrew_to_english_prompt(req.hebrew)
     except Exception as exc:
@@ -137,7 +144,10 @@ async def generate(req: GenerateRequest) -> GenerateResponse:
     response_model=GenerateResponse,
     responses={422: {"model": RefusalResponse}},
 )
-async def refine(req: RefineRequest) -> GenerateResponse:
+async def refine(
+    req: RefineRequest,
+    _email: Annotated[str, Depends(verify_user)],
+) -> GenerateResponse:
     try:
         result = await refine_prompt(req.hebrew, req.prev_english, req.attempt)
     except Exception as exc:

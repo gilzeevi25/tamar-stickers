@@ -9,9 +9,19 @@ import { PreviewCard } from "@/components/PreviewCard";
 import { PrinterStatus, type ConnectionState } from "@/components/PrinterStatus";
 import { PrintingScreen } from "@/components/PrintingScreen";
 import { RecordButton } from "@/components/RecordButton";
+import { SignInGate } from "@/components/SignInGate";
 import { ThinkingAnimation } from "@/components/ThinkingAnimation";
 import { TranscriptBubble } from "@/components/TranscriptBubble";
-import { ApiError, RefusalError, generate, refine, transcribe, warmup } from "@/lib/api";
+import {
+  ApiError,
+  AuthError,
+  RefusalError,
+  generate,
+  refine,
+  transcribe,
+  warmup,
+} from "@/lib/api";
+import { useAuthStore } from "@/lib/auth";
 import { usePushToTalk } from "@/lib/audio";
 import { type PrinterHandle, connectPrinter, printImage } from "@/lib/printer";
 import { playError, playRecordStart, playRecordStop, playSuccess } from "@/lib/sound";
@@ -28,9 +38,19 @@ function base64ToBytes(b64: string): Uint8Array {
 }
 
 export default function Page() {
+  return (
+    <SignInGate>
+      <MainApp />
+    </SignInGate>
+  );
+}
+
+function MainApp() {
   const screen = useAppStore((s) => s.screen);
   const setScreen = useAppStore((s) => s.setScreen);
   const reset = useAppStore((s) => s.reset);
+  const email = useAuthStore((s) => s.email);
+  const signOut = useAuthStore((s) => s.signOut);
 
   const ptt = usePushToTalk();
   const [connection, setConnection] = useState<ConnectionState>("idle");
@@ -103,6 +123,10 @@ export default function Page() {
         });
       } catch (err) {
         playError();
+        if (err instanceof AuthError) {
+          // Token rejected — SignInGate will reappear since the store cleared.
+          return;
+        }
         if (err instanceof RefusalError) {
           setScreen({ kind: "error", message: err.hebrew });
         } else if (err instanceof ApiError && err.status === 400) {
@@ -145,6 +169,7 @@ export default function Page() {
       });
     } catch (err) {
       playError();
+      if (err instanceof AuthError) return;
       if (err instanceof RefusalError) {
         setScreen({ kind: "error", message: err.hebrew });
       } else {
@@ -235,22 +260,34 @@ export default function Page() {
 
   return (
     <main className="min-h-[100dvh] flex flex-col">
-      <header className="flex items-start justify-between p-4">
+      <header className="flex items-start justify-between p-4 gap-3">
         <PrinterStatus
           state={connection}
           deviceName={deviceName}
           onConnected={handleConnected}
           onError={handleConnectionError}
         />
-        {warming && (
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="rounded-full bg-sun/80 px-3 py-2 text-sm font-bold text-ink shadow-toy"
-          >
-            מתחממת... ☀️
-          </motion.span>
-        )}
+        <div className="flex items-center gap-2">
+          {warming && (
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="rounded-full bg-sun/80 px-3 py-2 text-sm font-bold text-ink shadow-toy"
+            >
+              מתחממת... ☀️
+            </motion.span>
+          )}
+          {email && (
+            <button
+              type="button"
+              onClick={signOut}
+              className="rounded-full bg-white/80 px-3 py-2 text-xs font-bold text-ink/70 shadow-toy"
+              title={email}
+            >
+              יציאה
+            </button>
+          )}
+        </div>
       </header>
 
       <section className="flex-1 flex items-center justify-center px-6 pb-12">
