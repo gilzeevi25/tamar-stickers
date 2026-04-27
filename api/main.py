@@ -28,8 +28,27 @@ allowed_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
 if frontend_url:
     allowed_origins.append(frontend_url)
 
+
+class LoggingCORSMiddleware(CORSMiddleware):
+    """CORSMiddleware that prints the request details when a preflight is rejected."""
+
+    def preflight_response(self, request_headers):  # type: ignore[override]
+        response = super().preflight_response(request_headers)
+        if response.status_code == 400:
+            print(
+                "[cors] preflight rejected: "
+                f"origin={request_headers.get('origin')!r} "
+                f"method={request_headers.get('access-control-request-method')!r} "
+                f"headers={request_headers.get('access-control-request-headers')!r} "
+                f"allow_origins={allowed_origins!r} "
+                f"reason={response.body.decode('utf-8', 'replace')!r}",
+                flush=True,
+            )
+        return response
+
+
 app.add_middleware(
-    CORSMiddleware,
+    LoggingCORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
