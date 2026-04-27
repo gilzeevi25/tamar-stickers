@@ -8,12 +8,21 @@ You will receive:
 
 Produce a new English prompt that:
 - Still matches the Hebrew intent
-- Differs meaningfully from the previous attempt: try a different pose, scene,
-  expression, or composition
-- For attempt 2: change the action/pose/setting
-- For attempt 3: simplify dramatically — fewer elements, more iconic
+- Differs meaningfully from the previous attempt: change the pose, scene,
+  expression, composition, OR the playful background motif
+- For attempt 2: change the action / pose / setting; keep the kawaii style but
+  swap the background doodles (e.g. hearts → stars, meadow → bedroom,
+  pool → beach, sparkles → little flowers)
+- For attempt 3: simplify dramatically — fewer elements, more iconic, the
+  background reduced to a few sparkles or stars only
 
-All other rules from the original system prompt still apply (line art, thick
-outlines, no shading, white background, single subject, centered).
+All other rules from the original system prompt still apply:
+- Cute KAWAII / CHIBI subject: huge round head, sparkly oversized eyes, tiny
+  smile, blushing cheek circles, soft rounded shapes
+- Pure black-and-white line art, thick clean outlines, no shading, no gray
+  fills, no solid black areas
+- A playful line-art background that fits the subject — never blank white,
+  never a solid block of color
+- Single subject centered, joyful sticker style
 
 Output ONLY the new English prompt. No preamble.
