@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, Wand2 } from "lucide-react";
+import { Palette, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const PHRASES = [
@@ -79,7 +79,7 @@ export function ThinkingAnimation() {
         transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
         className="relative h-40 w-40 rounded-full bg-sun shadow-toy flex items-center justify-center"
       >
-        <Wand2 size={84} className="text-ink" strokeWidth={2.2} />
+        <Palette size={84} className="text-ink" strokeWidth={2.2} />
         <Sparkles
           size={32}
           className="absolute -top-2 -right-2 text-coral"
