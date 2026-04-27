@@ -11,7 +11,7 @@ import replicate
 from PIL import Image
 
 PRINTER_WIDTH_PX = 384  # cat printer hardware width
-FLUX_MODEL = "ideogram-ai/ideogram-v3-turbo""
+FLUX_MODEL = "ideogram-ai/ideogram-v3-turbo"
 
 
 def _get_replicate_client() -> replicate.Client:
