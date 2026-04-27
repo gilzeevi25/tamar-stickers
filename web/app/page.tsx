@@ -25,10 +25,22 @@ import { useAuthStore } from "@/lib/auth";
 import { usePushToTalk } from "@/lib/audio";
 import { type PrinterHandle, connectPrinter, printImage } from "@/lib/printer";
 import { playError, playRecordStart, playRecordStop, playSuccess } from "@/lib/sound";
-import { useAppStore } from "@/lib/state";
+import { type Screen, useAppStore } from "@/lib/state";
 
-const TRANSCRIPT_HOLD_MS = 1500;
+const TRANSCRIPT_HOLD_MS = 800;
 const DONE_HOLD_MS = 2000;
+
+function getHebrew(screen: Screen): string | null {
+  switch (screen.kind) {
+    case "showTranscript":
+    case "thinking":
+    case "refining":
+    case "preview":
+      return screen.hebrew;
+    default:
+      return null;
+  }
+}
 
 function base64ToBytes(b64: string): Uint8Array {
   const bin = atob(b64);
@@ -258,6 +270,8 @@ function MainApp() {
 
   // ---- render ----
 
+  const currentHebrew = getHebrew(screen);
+
   return (
     <main className="min-h-[100dvh] flex flex-col">
       <header className="flex items-start justify-between p-4 gap-3">
@@ -289,6 +303,14 @@ function MainApp() {
           )}
         </div>
       </header>
+
+      <div className="px-6 pt-2 pb-6 flex justify-center">
+        <AnimatePresence>
+          {currentHebrew && (
+            <TranscriptBubble key="persistent-transcript" hebrew={currentHebrew} />
+          )}
+        </AnimatePresence>
+      </div>
 
       <section className="flex-1 flex items-center justify-center px-6 pb-12">
         <AnimatePresence mode="wait">
@@ -337,17 +359,6 @@ function MainApp() {
                 className="block h-12 w-12 rounded-full border-4 border-coral/30 border-t-coral"
               />
               <p className="text-lg font-bold text-ink/70">מקשיבה...</p>
-            </motion.div>
-          )}
-
-          {screen.kind === "showTranscript" && (
-            <motion.div
-              key="transcript"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <TranscriptBubble hebrew={screen.hebrew} />
             </motion.div>
           )}
 
